@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <base target="_top">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+      <script src="//www.google.com/jsapi"></script><script>window.parent.maeExportApis_();</script>
+      <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css" />
+      <script>
+         function preventFormSubmit() {
+           var forms = document.querySelectorAll('form');
+           for (var i = 0; i < forms.length; i++) {
+             forms[i].addEventListener('submit', function(event) {
+               event.preventDefault();
+             });
+           }
+         }
+         window.addEventListener('load', preventFormSubmit);
+
+         function handleFormSubmit(formObject) {
+           google.script.run.withSuccessHandler(closeModal).withFailureHandler(onFailure).saveCredentialsSPAPI(formObject);
+         }
+
+         function closeModal() {
+           google.script.host.close();
+         }
+
+         function onFailure() {
+
+         }
+
+         function loadMWSConfig(config){
+           var configData = JSON.parse(config);
+           $("#awsAccessKey").val(configData.awsAccessKey);
+           $("#awsSecretKey").val(configData.awsSecretKey);
+           $("#refreshToken").val(configData.refreshToken);
+           $("#roleArn").val(configData.roleArn);
+           $("#lwaClientId").val(configData.lwaClientId);
+           $("#lwaClientSecret").val(configData.lwaClientSecret);
+           $("#defaultMarket").val(configData.defaultMarket);
+         }
+
+         function showCurrentUserEmail(email){
+            $("#activeUser").html(email);
+         }
+
+         google.script.run.withSuccessHandler(loadMWSConfig).loadCredentials();
+         google.script.run.withSuccessHandler(showCurrentUserEmail).getCurrentUser();
+      </script>
+   </head>
+   <body>
+      <div class="form-group">Welcome <span id="activeUser" style="font-weight: bold;"></span>!</div><br>
+        <span>
+          Please follow the <a target='_blank' href='https://github.com/amzn/selling-partner-api-docs/blob/main/guides/en-US/developer-guide/SellingPartnerApiDeveloperGuide.md#creating-and-configuring-iam-policies-and-entities'>link</a> to configure the Amazon SP-API: <br>https://github.com/amzn/selling-partner-api-docs/blob/main/guides/en-US/developer-guide/SellingPartnerApiDeveloperGuide.md#creating-and-configuring-iam-policies-and-entities.
+        </span><br><br>
+      <form id="credentials" onsubmit="handleFormSubmit(this)">
+         <div class="form-group">
+            <label for="sellerID">AWS Access Key</label>
+            <input type="password" name="awsAccessKey" id="awsAccessKey" class="credential" value="" style="width: 100%;" required>
+         </div>
+         <br>
+         <div class="form-group">
+            <label for="authToken">AWS Secret Key</label>
+            <input type="password" name="awsSecretKey" id="awsSecretKey" class="credential" value="" style="width: 100%;" required>
+         </div>
+         <br>
+         <div class="form-group">
+            <label for="sellerID">Refresh Token</label>
+            <input type="password" name="refreshToken" id="refreshToken" class="credential" value="" style="width: 100%;" required>
+         </div>
+         <br>
+         <div class="form-group">
+            <label for="authToken">AWS Role ARN</label>
+            <input type="password" name="roleArn" id="roleArn" value="" class="credential" style="width: 100%;" required>
+         </div>
+         <br>
+         <div class="form-group">
+            <label for="authToken">LWA Client Id</label>
+            <input type="password" name="lwaClientId" id="lwaClientId" value="" class="credential" style="width: 100%;" required>
+         </div>
+         <br>
+         <div class="form-group">
+            <label for="authToken">LWA Client Secret</label>
+            <input type="password" name="lwaClientSecret" id="lwaClientSecret" value="" class="credential" style="width: 100%;" required>
+         </div>
+         <br>
+         <div class="form-group">
+            <label for="defaultMarket">Default Marketplace</label>
+            <select name="defaultMarket" id="defaultMarket" style="width: 100%;">
+               <option value="ATVPDKIKX0DER">United States</option>
+               <option value="A39IBJ37TRP1C6">Australia</option>
+               <option value="A2Q3Y263D00KWC">Brazil</option>
+               <option value="A2EUQ1WTGCTBG2">Canada</option>
+               <option value="A13V1IB3VIYZZH">France</option>
+               <option value="A1PA6795UKMFR9">Germany</option>
+               <option value="A21TJRUUN4KGV">India</option>
+               <option value="APJ6JRA9NG5V4">Italy</option>
+               <option value="A1VC38T7YXB528">Japan</option>
+               <option value="A1AM78C64UM0Y8">Mexico</option>
+               <option value="A19VAU5U5O7RUS">Singapore</option>
+               <option value="A1RKKUPIHCS9HS">Spain</option>
+               <option value="A33AVAJ2PDY3EV">Turkey</option>
+               <option value="A2VIGQ35RCS4UG">United Arab Emirates</option>
+               <option value="A1F83G8C2ARO7P">United Kingdom</option>
+            </select>
+         </div>
+         <br>
+         <div class="form-group">
+            <input type="checkbox" name="showCredentials" id="showCredentials">
+            <label for="sellerID">Show Credentials</label>
+         </div>
+         <br>
+         <button class="share">Save</button>
+         <input type="button" value="Close" onclick="closeModal()">
+      </form>
+      <script>
+         $(document).ready(function() {
+         $('#showCredentials').change(function() {
+         var credentials = $(".credential");
+                 if(this.checked) {
+                   $(".credential").each(function(index, value) {
+                     $(this).prop("type", "text")
+                   });
+                 }else{
+                   $(".credential").each(function(index, value) {
+                     $(this).prop("type", "password")
+                   });
+                 }
+             });
+             });
+
+
+      </script>
+   </body>
+</html>

@@ -1,0 +1,111 @@
+function deleteData(slaveSheetID, sheetName, sheet, logDate) {
+  Logger.log('Inside delete function');
+  /*
+  var clientSheetId = '1lOVz5qy9Gg4NtGb_huAmKrixJ0-NgtWR1p0-7xktHFM';
+  var sheetName = 'GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL';
+
+  var activeSpredsheet = SpreadsheetApp.openById(clientSheetId);
+  var sheet = activeSpredsheet.getSheetByName(sheetName);
+  */
+  var logColumn = columnToLetter(sheet.getLastColumn());
+
+  //const ss = sheetData.getActive();
+  const filterRange = sheetName+'!'+logColumn+'2:'+logColumn;
+  //const range = sheet.getRange('GET_FLAT_FILE_ALL_ORDERS_DATA_BY_ORDER_DATE_GENERAL!AH2:AH');
+
+
+  // const whichToDelete = /^(''+logDate+'')$/i;
+  const whichToDelete = logDate;
+  const range = sheet.getRange(filterRange);
+
+  const numDeletedRows = deleteRowsByColumnValues_(range, whichToDelete)
+  Logger.log('Total rows deleted : ' + numDeletedRows);
+
+}
+
+function deleteRows_(sheet, rowsToDelete) {
+  // version 1.1, written by --Hyde, 21 August 2022
+  //  - get unique row numbers to avoid deleting the same row number multiple times
+  // version 1.0, written by --Hyde, 23 July 2020
+  const rowNumbers = rowsToDelete.filter((value, index, array) => array.indexOf(value) === index);
+  const runLengths = getRunLengths_(rowNumbers.sort((a, b) => a - b));
+  for (let i = runLengths.length - 1; i >= 0; i--) {
+    sheet.deleteRows(runLengths[i][0], runLengths[i][1]);
+  }
+  return runLengths.length;
+}
+
+function deleteRowsByColumnValues_(range, whichToDelete) {
+  // version 1.0, written by --Hyde, 21 August 2022
+  //  - see https://support.google.com/docs/thread/176064924
+  const rowStart = range.getRow();
+  const values = range.getDisplayValues();
+  const rowsToDelete = [];
+  values.forEach((row, rowIndex) => {
+    if (row[0].match(whichToDelete)) {
+      rowsToDelete.push(rowStart + rowIndex);
+    }
+  });
+  deleteRows_(range.getSheet(), rowsToDelete);
+  return rowsToDelete.length;
+}
+function getRunLengths_(numbers) {
+  // version 1.1, written by --Hyde, 31 May 2021
+  if (!numbers.length) {
+    return [];
+  }
+  return numbers.reduce((accumulator, value, index) => {
+    if (!index || value !== 1 + numbers[index - 1]) {
+      accumulator.push([value]);
+    }
+    const lastIndex = accumulator.length - 1;
+    accumulator[lastIndex][1] = (accumulator[lastIndex][1] || 0) + 1;
+    return accumulator;
+  }, []);
+}
+
+
+/**
+* Deletes all rows where the value in a column matches a regular expression.
+*
+* @param {SpreadsheetApp.Range} range The range to look at.
+* @param {RegExp} whichToDelete A regular expression that identifies the rows to delete.
+* @return {Number} The number of rows deleted.
+*/
+function deleteRowsByColumnValues_(range, whichToDelete) {
+  // version 1.0, written by --Hyde, 21 August 2022
+  //  - see https://support.google.com/docs/thread/176064924
+  const rowStart = range.getRow();
+  const values = range.getDisplayValues();
+  const rowsToDelete = [];
+  values.forEach((row, rowIndex) => {
+    if (row[0].match(whichToDelete)) {
+      rowsToDelete.push(rowStart + rowIndex);
+    }
+  });
+  deleteRows_(range.getSheet(), rowsToDelete);
+  return rowsToDelete.length;
+}
+
+
+function columnToLetter(column)
+{
+  var temp, letter = '';
+  while (column > 0)
+  {
+    temp = (column - 1) % 26;
+    letter = String.fromCharCode(temp + 65) + letter;
+    column = (column - temp - 1) / 26;
+  }
+  return letter;
+}
+
+function letterToColumn(letter)
+{
+  var column = 0, length = letter.length;
+  for (var i = 0; i < length; i++)
+  {
+    column += (letter.charCodeAt(i) - 64) * Math.pow(26, length - i - 1);
+  }
+  return column;
+}
